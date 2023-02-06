@@ -1,0 +1,25 @@
+pipeline{
+    agent any
+     stages {
+        stage('git checkout'){
+          steps{
+             git credentialsId: '', url: 'https://github.com/VR-lakshmi/LexisNexisProject.git'
+          }
+        }
+        stage('terraform init'){
+          steps{
+              sh 'terraform init'
+              }
+          }
+          stage('terraform plan'){
+          steps{
+              sh 'terraform plan'
+              }
+          }
+          stage('terraform apply'){
+          steps{
+                echo "Terraform action is --> ${action}"    #choose either apply/destroy
+                sh ('terraform ${action} --auto-approve') 
+              }
+          }
+     }

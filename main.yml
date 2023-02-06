@@ -1,0 +1,63 @@
+- name : Tomcat Install and configure
+  hosts : all
+  become : true
+  vars :
+     name : https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.83/bin/apache-tomcat-8.5.83.tar.gz
+  tasks :
+      - name : ping remote
+        ansible.builtin.debug:
+          msg: "Yes, I Am Availble"
+
+      - name : install java
+        ansible.builtin.yum:
+          state: latest
+          name : java
+
+      - name: Create the group
+        group: 
+          name: tomcat
+          state: present
+
+      - name: Create the user
+        user:
+          name: tomcat
+          state: present
+
+      - name: Create a Directory /opt/tomcat
+        file:
+          path: /opt/tomcat
+          state: directory
+          mode: 0755
+          owner: tomcat
+          group: tomcat
+
+      - name : install tomcat
+        ansible.builtin.get_url:
+          url: {{name}}
+          dest: /opt/tomcat
+          validate_certs: false
+
+      - name : Extracting tomcat
+        unarchive:
+          src: /opt/tomcat/apache-tomcat-8.5.83.tar.gz
+          dest: /opt/tomcat
+          remote_src: yes
+
+      - name: Check if java is installed
+        shell: java -version
+
+      - name: copy war file
+        copy:
+          src: /var/lib/jenkins/workspace/test1/target/webapp.war
+          dest: /opt/apache-tomcat-9.0.68/webapps
+
+      - name: Enable the tomcat service and start
+        systemd:
+          name: tomcat
+          enabled: yes
+          state: started
+          daemon_reload: true
+
+    
+     
+
